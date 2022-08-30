@@ -11,7 +11,7 @@ import Typography from "@mui/material/Typography";
 import OnBoardingOneMachine, {
   OnBoardingSteps,
   OnBoardingStates,
-} from "../../machines/onboarding-02";
+} from "../../machines/onboarding-03";
 import { Container, TextField } from "@mui/material";
 
 const steps = ["Choose Username", "Set basic info", "Confirmation"];

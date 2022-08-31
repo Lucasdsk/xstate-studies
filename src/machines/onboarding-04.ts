@@ -33,7 +33,7 @@ const onBoardingMachine =
   createMachine(
     {
       context: { userName: "", validUserName: false, canGoNext: true },
-      tsTypes: {} as import("./onboarding-03.typegen").Typegen0,
+      tsTypes: {} as import("./onboarding-04.typegen").Typegen0,
       schema: {
         context: {} as OnBoardingContext,
         events: {} as OnBoardingMachineEvents,
@@ -44,10 +44,6 @@ const onBoardingMachine =
       states: {
         chooseUsername: {
           initial: "idle",
-          id: "chooseUserName",
-          meta: {
-            description: "Choose Username",
-          },
           states: {
             idle: {
               always: {
@@ -61,7 +57,12 @@ const onBoardingMachine =
               },
             },
             validating: {
-              entry: "validateUsernameDisponibility",
+              invoke: {
+                src: "fetchData",
+                onDone: {
+                  actions: "fetchDataSuccess",
+                },
+              },
             },
             valid: {},
           },
@@ -72,7 +73,6 @@ const onBoardingMachine =
           },
         },
         setBasicInfo: {
-          id: "setBasicInfo",
           on: {
             NEXT: {
               target: "confirmation",
@@ -83,7 +83,6 @@ const onBoardingMachine =
           },
         },
         confirmation: {
-          id: "confirmation",
           on: {
             NEXT: {
               target: "done",
@@ -93,9 +92,7 @@ const onBoardingMachine =
             },
           },
         },
-        done: {
-          id: "done",
-        },
+        done: {},
       },
     },
     {
@@ -109,12 +106,9 @@ const onBoardingMachine =
         setUserName: assign({
           userName: (context, event) => event.value,
         }),
-        validateUsernameDisponibility: assign({
-          validUserName: (context, event) => {
-            console.log("validate userName");
-            return true;
-          },
-        }),
+        fetchDataSuccess: (context, event) => {
+          console.log("fetchDataSuccess", context, event.data);
+        },
       },
     }
   );

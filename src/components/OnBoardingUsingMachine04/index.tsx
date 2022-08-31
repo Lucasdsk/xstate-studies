@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useMachine } from "@xstate/react";
+import { useLazyQuery, gql } from "@apollo/client";
 
 import Box from "@mui/material/Box";
 import Stepper from "@mui/material/Stepper";
@@ -11,13 +12,31 @@ import Typography from "@mui/material/Typography";
 import OnBoardingOneMachine, {
   OnBoardingSteps,
   OnBoardingStates,
-} from "../../machines/onboarding-03";
+} from "../../machines/onboarding-04";
 import { Container, TextField } from "@mui/material";
 
 const steps = ["Choose Username", "Set basic info", "Confirmation"];
 
+const GET_LOCATIONS = gql`
+  query GetLocations {
+    locations {
+      id
+      name
+      description
+      photo
+    }
+  }
+`;
+
+// Passar um service async por aqui
 export default function HorizontalLinearStepper() {
-  const [state, send] = useMachine(OnBoardingOneMachine);
+  const [getLocations, { loading, error, data }] = useLazyQuery(GET_LOCATIONS);
+
+  const [state, send] = useMachine(OnBoardingOneMachine, {
+    services: {
+      fetchData: (context, event) => getLocations(),
+    },
+  });
 
   const handleNext = () => send("NEXT");
 
@@ -35,7 +54,9 @@ export default function HorizontalLinearStepper() {
   const currentStateValueAsString =
     state.value.toString() as keyof typeof OnBoardingSteps;
 
-  console.log("meta", state.value, state.meta);
+  React.useEffect(() => {
+    console.log("GET_LOCATIONS", data);
+  }, [data]);
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -75,7 +96,6 @@ export default function HorizontalLinearStepper() {
               <code>
                 {JSON.stringify({
                   currentState: state.value,
-                  metaData: state.meta,
                   context: state.context,
                 })}
               </code>
